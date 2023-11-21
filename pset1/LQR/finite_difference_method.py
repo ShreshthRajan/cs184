@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def gradient(f, x, delta=1e-5):
+def gradient(f, x, delta=1e-6):
     """
     Returns the gradient of function f at the point x
     Parameters:
@@ -25,7 +25,7 @@ def gradient(f, x, delta=1e-5):
     return gradient
 
 
-def jacobian(f, x, delta=1e-5):
+def jacobian(f, x, delta=1e-6):
     """
     Returns the Jacobian of function f at the point x
     Parameters:
@@ -52,7 +52,7 @@ def jacobian(f, x, delta=1e-5):
 
 
 
-def hessian(f, x, delta=1e-5):
+def hessian(f, x, delta=1e-6):
     """
     Returns the Hessian of function f at the point x
     Parameters:

@@ -175,10 +175,6 @@ def test_compute_Q_params():
         p = np.random.rand(1)
 
         C, D, E, f, g, h = compute_Q_params(A, B, m, Q, R, M, q, r, b, P, y, p)
-        
-
-        print("Computed 'f':\n", f)
-        print("Expected 'f':\n", data['f'])
 
         assert np.allclose(C, data['C'])
         assert np.allclose(D, data['D'])

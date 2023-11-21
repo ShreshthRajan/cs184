@@ -48,40 +48,12 @@ def compute_Q_params(A, B, m, Q, R, M, q, r, b, P, y, p):
     assert y.shape == (n_x, 1)
     assert p.shape == (1, )
 
-    C = np.zeros((n_x, n_x))
-    D = np.zeros((n_x, n_u))
-    E = np.zeros((n_x, n_u))
-    f = np.zeros((n_x, 1))
-    g = np.zeros((n_u, 1))
-    h = np.zeros((1,))
-
-    C = Q + A.T @ P @ A
-    D = R + B.T @ P @ B
-    E = M + 2 * A.T @ P @ B
-    f = q + A.T @ (P @ m + y)
-    g = r + B.T @ (P @ m + y)
-    h = b + 0.5 * m.T @ P @ m + m.T @ y + p
-
-    print("Computed C:", C)
-    print("Computed D:", D)
-    print("Computed E:", E)
-    print("Computed f:", f)
-    print("Computed g:", g)
-    print("Computed h:", h)
-
-    # Print input parameters for verification
-    print("Input A:", A)
-    print("Input B:", B)
-    print("Input m:", m)
-    print("Input Q:", Q)
-    print("Input R:", R)
-    print("Input M:", M)
-    print("Input q:", q)
-    print("Input r:", r)
-    print("Input b:", b)
-    print("Input P:", P)
-    print("Input y:", y)
-    print("Input p:", p)
+    C = Q + np.transpose(A) @ (P @ A) # (n_x, n_x)
+    D = R + np.transpose(B) @ (P @ B) # (n_x, n_u)
+    E = M + 2*(np.transpose(A) @ (P @ B)) # (n_x, n_u)
+    f = q + np.transpose(A) @ y + 2*((np.transpose(A) @ P) @ m) # (n_x, 1)
+    g = r + np.transpose(B) @ y + 2*((np.transpose(B) @ P) @ m) # (n_u, 1)
+    h = (b + np.transpose(m) @ (P @ m) + np.transpose(m) @ y + p).reshape((1,)) # 1
 
     return C, D, E, f, g, h
 
@@ -165,16 +137,11 @@ def compute_V_params(A, B, m, C, D, E, f, g, h, K, k):
     assert K.shape == (n_u, n_x)
     assert k.shape == (n_u, 1)
 
-    P_h = np.zeros((n_x, n_x))
-    y_h = np.zeros((n_x, 1))
-    p_h = np.zeros(1)
-
-    P_h = C + K.T @ D @ K + E @ K  # Updated
-    y_h = f + K.T @ D @ k + K.T @ g + E.T @ k  # Updated
-    p_h = h + 0.5 * k.T @ D @ k + k.T @ g  # Updated
+    P_h = C + np.transpose(K) @ (D @ K) + E @ K # (n_x, n_x)
+    y_h = 2*(np.transpose(K) @ np.transpose(D)) @ k + E @ k + np.transpose(K) @ g + f # (n_x, 1)
+    p_h = (np.transpose(k) @ (np.transpose(D) @ k) + np.transpose(k) @ g + h).reshape((1,)) # 1
 
     return P_h, y_h, p_h
-
 
 def lqr(A, B, m, Q, R, M, q, r, b, T):
     """
@@ -216,14 +183,16 @@ def lqr(A, B, m, Q, R, M, q, r, b, T):
     assert b.shape == (1, )
 
     # Initialize P, y, and p
-    P, y, p = Q, q, b
+    P = np.zeros((n_x, n_x))
+    y = np.zeros((n_x, 1))
+    p = np.zeros((1, ))
     ret = []
 
-    for t in range(T - 1, -1, -1):  # Backward iteration
+    for i in range(T-1, -1, -1): # Backward iteration
         C, D, E, f, g, h = compute_Q_params(A, B, m, Q, R, M, q, r, b, P, y, p)
         K, k = compute_policy(A, B, m, C, D, E, f, g, h)
         P, y, p = compute_V_params(A, B, m, C, D, E, f, g, h, K, k)
-
-        ret.insert(0, (K, k))
+        
+        ret.insert(0, (K, k.reshape((1,))))
 
     return ret  # Return the computed policies
