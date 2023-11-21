@@ -51,16 +51,37 @@ def compute_Q_params(A, B, m, Q, R, M, q, r, b, P, y, p):
     C = np.zeros((n_x, n_x))
     D = np.zeros((n_x, n_u))
     E = np.zeros((n_x, n_u))
-    f = np.zeros(n_x, 1)
-    g = np.zeros(n_u, 1)
-    h = np.zeros(1)
+    f = np.zeros((n_x, 1))
+    g = np.zeros((n_u, 1))
+    h = np.zeros((1,))
 
     C = Q + A.T @ P @ A
     D = R + B.T @ P @ B
-    E = M + A.T @ P @ B
+    E = M + 2 * A.T @ P @ B
     f = q + A.T @ (P @ m + y)
     g = r + B.T @ (P @ m + y)
     h = b + 0.5 * m.T @ P @ m + m.T @ y + p
+
+    print("Computed C:", C)
+    print("Computed D:", D)
+    print("Computed E:", E)
+    print("Computed f:", f)
+    print("Computed g:", g)
+    print("Computed h:", h)
+
+    # Print input parameters for verification
+    print("Input A:", A)
+    print("Input B:", B)
+    print("Input m:", m)
+    print("Input Q:", Q)
+    print("Input R:", R)
+    print("Input M:", M)
+    print("Input q:", q)
+    print("Input r:", r)
+    print("Input b:", b)
+    print("Input P:", P)
+    print("Input y:", y)
+    print("Input p:", p)
 
     return C, D, E, f, g, h
 
@@ -101,8 +122,8 @@ def compute_policy(A, B, m, C, D, E, f, g, h):
     assert h.shape == (1, )
 
     inv_D = np.linalg.inv(D)
-    K_t = -inv_D @ (B.T @ C)
-    k_t = -inv_D @ g
+    K_t = -0.5 * inv_D @ E.T  
+    k_t = -0.5 * inv_D @ g 
 
     return K_t, k_t
 
@@ -148,9 +169,9 @@ def compute_V_params(A, B, m, C, D, E, f, g, h, K, k):
     y_h = np.zeros((n_x, 1))
     p_h = np.zeros(1)
 
-    P_h = C + K.T @ D @ K + (K.T @ E + E.T @ K)
-    y_h = f + K.T @ D @ k + K.T @ g + E.T @ k
-    p_h = h + 0.5 * k.T @ D @ k + k.T @ g
+    P_h = C + K.T @ D @ K + E @ K  # Updated
+    y_h = f + K.T @ D @ k + K.T @ g + E.T @ k  # Updated
+    p_h = h + 0.5 * k.T @ D @ k + k.T @ g  # Updated
 
     return P_h, y_h, p_h
 

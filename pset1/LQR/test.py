@@ -50,11 +50,6 @@ def test_compute_policy():
 
     Kout, kout = compute_policy(A, B, m, C, D, E, f, g, h)
 
-    print("Computed Kout:")
-    print(Kout)
-    print("Expected K:")
-    print(K)
-
     assert np.allclose(Kout, K)
     assert np.allclose(kout, k)
 
@@ -182,12 +177,16 @@ def test_compute_Q_params():
         C, D, E, f, g, h = compute_Q_params(A, B, m, Q, R, M, q, r, b, P, y, p)
         
 
+        print("Computed 'f':\n", f)
+        print("Expected 'f':\n", data['f'])
+
         assert np.allclose(C, data['C'])
         assert np.allclose(D, data['D'])
         assert np.allclose(E, data['E'])
         assert np.allclose(f, data['f'])
         assert np.allclose(g, data['g'])
         assert np.allclose(h, data['h'])
+        assert np.allclose(f, data['f']), "Computed 'f' does not match expected 'f'"
 
     print('Test Compute Q Params Successfully!\n')
 
