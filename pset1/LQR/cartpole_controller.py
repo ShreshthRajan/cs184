@@ -23,7 +23,7 @@ class LocalLinearizationController:
             cost (double)
         """
         assert x.shape == (4,)
-        assert x.shape == (1,)
+        assert u.shape == (1,)
         env = self.env
         env.reset(state=x)
         observation, cost, done, info = env.step(u)
@@ -74,19 +74,24 @@ class LocalLinearizationController:
         cxx = hessian(lambda x_: self.c(x_, u_star), x_star) # shape (4,4)
         cuu = hessian(lambda u_: self.c(x_star, u_), u_star) # shape (1,1)
 
+        # Convert gradients to the appropriate shape
+        cx = np.reshape(cx, (4, 1))
+        cu = np.reshape(cu, (1, 1))
+
         # 3. Use LQR to compute optimal policy given linearized dynamics and quadratic cost
+        # Assuming cost function is approximately quadratic: 0.5 * x^T Q x + 0.5 * u^T R u
         Q = cxx
         R = cuu
-        Qf = Q # Final cost, in this case, it's the same as the cost at each step
-        xf = x_star # Desired final state
+        M = np.zeros((4, 1))  # Cross-term, assuming it's zero
+        q = cx
+        r = cu
+        b = np.zeros(1)  # Constant term, assuming it's zero
+        m = np.zeros((4, 1))  # Constant term in dynamics, assuming it's zero
 
-        # For LQR, assuming the dynamics are x_next = Ax + Bu and the cost is 0.5*x^T Q x + 0.5*u^T R u
-        Ks, ks = lqr(A, B, Q, R, Qf, xf, T)
+        # Call the LQR function to get the optimal policies
+        Ks = lqr(A, B, m, Q, R, M, q, r, b, T)
 
-        # Placeholder return
-        return [(np.zeros((1,4)), np.zeros(1)) for _ in range(T)]
-
-
+        return Ks
 
 class PIDController:
     """

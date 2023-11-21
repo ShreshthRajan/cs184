@@ -49,6 +49,12 @@ def test_compute_policy():
     k = np.array([-0.])
 
     Kout, kout = compute_policy(A, B, m, C, D, E, f, g, h)
+
+    print("Computed Kout:")
+    print(Kout)
+    print("Expected K:")
+    print(K)
+
     assert np.allclose(Kout, K)
     assert np.allclose(kout, k)
 
@@ -174,6 +180,7 @@ def test_compute_Q_params():
         p = np.random.rand(1)
 
         C, D, E, f, g, h = compute_Q_params(A, B, m, Q, R, M, q, r, b, P, y, p)
+        
 
         assert np.allclose(C, data['C'])
         assert np.allclose(D, data['D'])

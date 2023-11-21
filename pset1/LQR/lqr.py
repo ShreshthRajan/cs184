@@ -70,7 +70,6 @@ def compute_policy(A, B, m, C, D, E, f, g, h):
     Compute the optimal policy at the current time step t
     Let the shape of x_t be (n_x,), the shape of u_t be (n_u,)
 
-
     Let Q_t^*(x) = x^T C x + u^T D u + x^T E u + f^T x  + g^T u  + h
     Parameters:
         A (2d numpy array): A numpy array with shape (n_x, n_x)
@@ -101,11 +100,8 @@ def compute_policy(A, B, m, C, D, E, f, g, h):
     assert g.shape == (n_u, 1)
     assert h.shape == (1, )
 
-    K_t = np.zeros((n_u, n_x))
-    k_t = np.zeros(n_u)
-
     inv_D = np.linalg.inv(D)
-    K_t = -inv_D @ (E.T + B.T @ C)
+    K_t = -inv_D @ (B.T @ C)
     k_t = -inv_D @ g
 
     return K_t, k_t
@@ -187,6 +183,7 @@ def lqr(A, B, m, Q, R, M, q, r, b, T):
     # TODO
     n_x, n_u = B.shape
 
+    # Assertions to check the shapes of matrices
     assert A.shape == (n_x, n_x)
     assert B.shape == (n_x, n_u)
     assert m.shape == (n_x, 1)
@@ -197,6 +194,7 @@ def lqr(A, B, m, Q, R, M, q, r, b, T):
     assert r.shape == (n_u, 1)
     assert b.shape == (1, )
 
+    # Initialize P, y, and p
     P, y, p = Q, q, b
     ret = []
 
@@ -206,5 +204,5 @@ def lqr(A, B, m, Q, R, M, q, r, b, T):
         P, y, p = compute_V_params(A, B, m, C, D, E, f, g, h, K, k)
 
         ret.insert(0, (K, k))
-        
-    return [(np.zeros((n_u, n_x)), np.zeros(n_u)) for _ in range(T)]
+
+    return ret  # Return the computed policies
