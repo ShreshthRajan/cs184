@@ -1,0 +1,12 @@
+\newenvironment{bluetext}{\color{blue}}{\ignorespacesafterend}
+
+
+\ifshow
+  \newenvironment{s}
+  {\begin{bluetext}\begin{proof}[Solution.] }
+  {\end{proof}\end{bluetext}} 
+\else
+  \excludecomment{s}
+\fi
+
+\newcommand{\sk}[1]{\noindent{\textcolor{magenta}{\{{\bf SK:} #1\}}}}
